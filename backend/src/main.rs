@@ -30,6 +30,8 @@ use thiserror::Error;
 use anyhow::{Result};
 use askama::Template;
 use dotenv::dotenv;
+use hyper::header::CONTENT_TYPE;
+use tower_http::cors::{Any, CorsLayer, AllowOrigin};
 
 #[tokio::main]
 async fn main() {
@@ -71,7 +73,7 @@ where
         // https://docs.rs/axum/latest/axum/handler/trait.Handler.html
         // ここを読む
         // ::<> を Turbofish (ターボフィッシュ)
-        .route("/", get(show_form))
+        //.route("/", get(show_form))
         // 型推論を使わず、型Tを指定してinsert_postを引数にしている
         .route("/", post(insert_post::<T>))
         .route("/p/:id", get(find_post::<T>))
@@ -79,11 +81,19 @@ where
         // repositoryは各ハンドラの引数で受け取ることが可能
         //.layer(Extension(Arc::new(repository)))
         .with_state(Arc::new(repository))
+        .layer(
+            CorsLayer::new()
+                .allow_origin(AllowOrigin::exact("http://f1.nono.com".parse().unwrap()))
+                .allow_methods(Any)
+                .allow_headers(vec![CONTENT_TYPE])
+        )
 }
 
 /*
 formを表示する
  */
+
+/*
 async fn show_form() -> impl IntoResponse {
     let template = HelloTemplate { post_msg: "".to_string() };
     HtmlTemplate(template)
@@ -94,10 +104,12 @@ async fn show_form() -> impl IntoResponse {
 struct HelloTemplate {
     post_msg: String,
 }
+*/
 
 /*
 HtmlTemplateという構造体に対してIntoResponseトレイトを実装している
  */
+/*
 struct HtmlTemplate<T>(T);
 impl<T> IntoResponse for HtmlTemplate<T>
 where
@@ -114,7 +126,9 @@ where
         }
     }
 }
+*/
 
+/*
 #[derive(Deserialize, Debug)]
 #[allow(dead_code)]
 struct PostInput {
@@ -141,10 +155,12 @@ async fn check_msg(msg: &str) -> Result<&'static str> {
         Ok("ok")
     }
 }
+*/
 
 /*
 form受け取り
  */
+/*
 async fn accept_form(Form(post_input): Form<PostInput>) -> impl IntoResponse {
 
     // 入力チェック
@@ -160,3 +176,4 @@ async fn accept_form(Form(post_input): Form<PostInput>) -> impl IntoResponse {
     }
     HtmlTemplate(template)
 }
+*/
