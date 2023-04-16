@@ -4,11 +4,9 @@ handler
  */
 use axum::{
     extract::{
-        Extension,
         Path,
         FromRequest,
         State,
-        rejection::JsonRejection,
     },
     http::{
         StatusCode,
@@ -19,11 +17,8 @@ use axum::{
     Json, async_trait, BoxError,
 };
 use serde::de::DeserializeOwned;
-//use tokio::sync::mpsc::error::SendTimeoutError;
-
 use std::sync::Arc;
 use validator::Validate;
-
 use crate::repositories::{ PostRepository, PostContent };
 
 #[derive(Debug, Clone, Copy, Default)]
@@ -37,8 +32,6 @@ where
     B::Data: Send,
     B::Error: Into<BoxError>,
     S: Send + Sync,
-    //Json<T>: FromRequest<S, B, Rejection = JsonRejection>,
-    //B: Send + 'static,
 {
     type Rejection = (StatusCode, String);
 
@@ -79,3 +72,12 @@ pub async fn find_post<T: PostRepository>(
     Ok((StatusCode::OK, Json(post)))
 }
 
+pub async fn select_all_post<T: PostRepository>(
+    //Extension(repository): Extension<Arc<T>>,
+    State(repository): State<Arc<T>>,
+) -> Result<impl IntoResponse, StatusCode> {
+    let posts = repository.select_all().await.or(Err(StatusCode::NOT_FOUND))?;
+    println!("{:?}", posts);
+    Ok((StatusCode::OK, Json(posts)))
+    //Ok(Json(posts))
+}

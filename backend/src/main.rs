@@ -8,6 +8,7 @@ use crate::repositories::{
 use handlers::{
     find_post,
     insert_post,
+    select_all_post,
 };
 
 use axum::{
@@ -28,7 +29,6 @@ use std::{env, sync::Arc};
 use std::net::SocketAddr;
 use thiserror::Error;
 use anyhow::{Result};
-use askama::Template;
 use dotenv::dotenv;
 use hyper::header::CONTENT_TYPE;
 use tower_http::cors::{Any, CorsLayer, AllowOrigin};
@@ -75,6 +75,7 @@ where
         // ::<> を Turbofish (ターボフィッシュ)
         //.route("/", get(show_form))
         // 型推論を使わず、型Tを指定してinsert_postを引数にしている
+        .route("/getposts", get(select_all_post::<T>))
         .route("/", post(insert_post::<T>))
         .route("/p/:id", get(find_post::<T>))
         // axumアプリケーション内でrepositoryを共有することができ、
@@ -84,6 +85,7 @@ where
         .layer(
             CorsLayer::new()
                 .allow_origin(AllowOrigin::exact("http://f1.nono.com".parse().unwrap()))
+                .allow_origin(AllowOrigin::exact("http://nono:9000".parse().unwrap()))
                 .allow_methods(Any)
                 .allow_headers(vec![CONTENT_TYPE])
         )

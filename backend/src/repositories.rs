@@ -40,6 +40,7 @@ pub struct PostContent {
 // postに関するデータを取り出すコンポーネント
 #[async_trait]
 pub trait PostRepository : Clone + std::marker::Send + std::marker::Sync + 'static {
+    async fn select_all(&self) -> anyhow::Result<Vec<Post>>;
     async fn find(&self, id:u32) -> anyhow::Result<Post>;
     //async fn insert(&self, payload:PostContent) -> anyhow::Result<Post>;
     async fn insert(&self, payload:PostContent) -> anyhow::Result<()>;
@@ -78,6 +79,15 @@ SELECT * FROM post WHERE id=?
         })?;
         println!("{:?}", post);
         Ok(post)
+    }
+    // select_allメソッド
+    async fn select_all(&self) -> anyhow::Result<Vec<Post>>{
+        let posts = sqlx::query_as::<_, Post>(
+        r#"SELECT * FROM post WHERE is_delete = 0 order by id desc, created_at desc"#,
+        )
+        .fetch_all(&self.pool)
+        .await?;
+        Ok(posts)
     }
     // insertメソッド
     // 投稿内容をinsertした後にinsertされたデータを取得してPostへ格納
