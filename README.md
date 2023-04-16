@@ -1,38 +1,32 @@
-### front と backend
+# Rust BBS
 
-- /front/ : フロントエンドのソースコード
+目的：簡単な bbs のバックエンドシステムを rust を利用して実装します。
 
-  - /front/src/ : フロントエンドのソースコード
-  - /front/dist/ : フロントエンドのビルド結果
+## Tech Stack
 
-- /backend/ : バックエンドのソースコード
+**Server:**
 
-  - /backend/src/ : バックエンドのソースコード
+- Rust
+- MariaDB
+- axum
+- sqlx
 
-- 基本ルール
+**Client:**
 
-  - フロントエンドは html/CSS/Vanilla JavaScript を使用
-  - バックエンドは Rust を使用
-  - フロントエンドとバックエンドは REST API で通信
+- Svelte Kit
+- JavaScript
+- Windi CSS
 
-- コーディング規約
-  - フロントエンド
-    - [Google JavaScript Style Guide](https://google.github.io/styleguide/jsguide.html)
-  - バックエンド
-    - [Rust Style Guide]
-    - [Rust API Guidelines]
+## Rule
 
-### bbs の CRUD と http メソッド
+- Backend と Frontend は REST API で通信
+- SSR/SPA
+  - 初回のみサーバでレンダリングを行い、以降は JavaScript の通信でデータ取得を行い、ページ更新を実施する
 
----
+## API Reference
 
-- POST
-  - / : メッセージの投稿
-  - /:id : id に対応する投稿への返信
-- GET
-  - / : 投稿の一覧取得
-  - /:id : id に対応する投稿の取得
-- PATCH
-  - /:id : id に対応する投稿の更新
-- DELETE
-  - /:id : id に対応する投稿の削除
+#### Get all posts
+
+```http
+  GET /getposts
+```
