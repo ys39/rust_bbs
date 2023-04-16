@@ -11,6 +11,7 @@ use thiserror::Error;
 use sqlx::mysql::MySqlPool;
 use sqlx::FromRow;
 use validator::Validate;
+use chrono::NaiveDateTime;
 
 // エラー設定
 #[derive(Debug, Error)]
@@ -28,6 +29,14 @@ pub struct Post {
     content: String
 }
 
+// bbsへの投稿内容
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, FromRow)]
+pub struct PostDetail {
+    id: u32,
+    content: String,
+    created_at: chrono::DateTime<chrono::Utc>,
+}
+
 // bbsへの投稿内容(insert)
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Validate)]
 pub struct PostContent {
@@ -40,7 +49,7 @@ pub struct PostContent {
 // postに関するデータを取り出すコンポーネント
 #[async_trait]
 pub trait PostRepository : Clone + std::marker::Send + std::marker::Sync + 'static {
-    async fn select_all(&self) -> anyhow::Result<Vec<Post>>;
+    async fn select_all(&self) -> anyhow::Result<Vec<PostDetail>>;
     async fn find(&self, id:u32) -> anyhow::Result<Post>;
     //async fn insert(&self, payload:PostContent) -> anyhow::Result<Post>;
     async fn insert(&self, payload:PostContent) -> anyhow::Result<()>;
@@ -81,8 +90,8 @@ SELECT * FROM post WHERE id=?
         Ok(post)
     }
     // select_allメソッド
-    async fn select_all(&self) -> anyhow::Result<Vec<Post>>{
-        let posts = sqlx::query_as::<_, Post>(
+    async fn select_all(&self) -> anyhow::Result<Vec<PostDetail>>{
+        let posts = sqlx::query_as::<_, PostDetail>(
         r#"SELECT * FROM post WHERE is_delete = 0 order by id desc, created_at desc"#,
         )
         .fetch_all(&self.pool)

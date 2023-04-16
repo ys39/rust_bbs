@@ -6,8 +6,10 @@ export async function load() {
   // 必ずオブジェクトを返す
   return {
     list: posts.map((post) => ({
+      name: 'anonymous',
       id: post.id,
       content: post.content,
+      created_at: post.created_at,
     })),
   };
 }
