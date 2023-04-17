@@ -1,5 +1,6 @@
 <script>
 	export let data;
+  import Paging from '$lib/components/Paging.svelte';
 </script>
 
 <main class="container mx-auto my-8 flex-grow">
@@ -13,32 +14,8 @@
             <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-full transition duration-200 ease-in focus:ring-4 focus:ring-blue-300 focus:outline-none">送信</button>
         </div>
       </form>
-
-
-      <div class="container mx-auto py-12">
-        <div class="flex items-center justify-center">
-          <nav aria-label="Page navigation" class="text-center">
-            <ul class="flex items-center justify-between space-x-4">
-              <li>
-                <a href="#" class="block px-3 py-1 text-lg font-bold text-gray-700 rounded-md hover:bg-gray-300 focus:ring-2 focus:ring-blue-300 focus:outline-none">1</a>
-              </li>
-              <li>
-                <a href="#" class="block px-3 py-1 text-lg font-bold text-gray-700 rounded-md hover:bg-gray-300 focus:ring-2 focus:ring-blue-300 focus:outline-none">2</a>
-              </li>
-              <li>
-                <a href="#" class="block px-3 py-1 text-lg font-bold text-gray-700 rounded-md hover:bg-gray-300 focus:ring-2 focus:ring-blue-300 focus:outline-none">3</a>
-              </li>
-              <li>
-                <a href="#" class="block px-3 py-1 text-lg font-bold text-gray-700 rounded-md hover:bg-gray-300 focus:ring-2 focus:ring-blue-300 focus:outline-none">4</a>
-              </li>
-              <li>
-                <a href="#" class="block px-3 py-1 text-lg font-bold text-gray-700 rounded-md hover:bg-gray-300 focus:ring-2 focus:ring-blue-300 focus:outline-none">5</a>
-              </li>
-            </ul>
-          </nav>
-        </div>
-      </div>
-
+      
+      <Paging />
 
       <div class="container mx-auto py-6">
         <ul>
@@ -53,29 +30,7 @@
           {/each}
         </ul>
       </div>
-
-      <div class="container mx-auto py-12">
-        <div class="flex items-center justify-center">
-          <nav aria-label="Page navigation" class="text-center">
-            <ul class="flex items-center justify-between space-x-4">
-              <li>
-                <a href="#" class="block px-3 py-1 text-lg font-bold text-gray-700 rounded-md hover:bg-gray-300 focus:ring-2 focus:ring-blue-300 focus:outline-none">1</a>
-              </li>
-              <li>
-                <a href="#" class="block px-3 py-1 text-lg font-bold text-gray-700 rounded-md hover:bg-gray-300 focus:ring-2 focus:ring-blue-300 focus:outline-none">2</a>
-              </li>
-              <li>
-                <a href="#" class="block px-3 py-1 text-lg font-bold text-gray-700 rounded-md hover:bg-gray-300 focus:ring-2 focus:ring-blue-300 focus:outline-none">3</a>
-              </li>
-              <li>
-                <a href="#" class="block px-3 py-1 text-lg font-bold text-gray-700 rounded-md hover:bg-gray-300 focus:ring-2 focus:ring-blue-300 focus:outline-none">4</a>
-              </li>
-              <li>
-                <a href="#" class="block px-3 py-1 text-lg font-bold text-gray-700 rounded-md hover:bg-gray-300 focus:ring-2 focus:ring-blue-300 focus:outline-none">5</a>
-              </li>
-            </ul>
-          </nav>
-        </div>
-      </div>
+      
+      <Paging />
 
 </main>
