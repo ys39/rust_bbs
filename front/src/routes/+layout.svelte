@@ -1,7 +1,7 @@
 <script>
   import 'virtual:windi.css';
 </script>
-<header class="bg-sky-400 text-white py-8">
+<header class="bg-sky-400 text-white py-4">
   <h1 class="text-3xl font-bold text-center">Demo BBS</h1>
 </header>
 

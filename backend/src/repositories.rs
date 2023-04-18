@@ -12,6 +12,7 @@ use sqlx::mysql::MySqlPool;
 use sqlx::FromRow;
 use validator::Validate;
 use chrono::NaiveDateTime;
+use chrono::{DateTime, Utc, FixedOffset};
 
 // エラー設定
 #[derive(Debug, Error)]
@@ -102,6 +103,7 @@ SELECT * FROM post WHERE id=?
     // 投稿内容をinsertした後にinsertされたデータを取得してPostへ格納
     //async fn insert(&self, payload: PostContent) -> anyhow::Result<Post>{
     async fn insert(&self, payload: PostContent) -> anyhow::Result<()>{
+        let datetime = chrono::Local::now().naive_local();
         println!("{:?}", payload);
         /*
         let post = sqlx::query_as::<_, Post>(
@@ -119,11 +121,12 @@ select * from post where id = (select last_insert_id());
 
         sqlx::query::<_>(
         r#"
-insert into post (content, is_delete)
-values (?, 0)
+insert into post (content, is_delete, created_at, updated_at)
+values (?, 0, ?, ?);
         "#,
         )
         .bind(payload.content.clone())
+        .bind(datetime).bind(datetime)
         .execute(&self.pool)
         .await?;
         Ok(())
