@@ -23,10 +23,33 @@
 - SSR/SPA
   - 初回のみサーバでレンダリングを行い、以降は JavaScript の通信でデータ取得を行い、ページ更新を実施する
 
+
 ## API Reference
+
+#### Post message
+
+```http
+  POST /
+```
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `content` | `string` | **Required**. message |
+
 
 #### Get all posts
 
 ```http
   GET /getposts
 ```
+
+#### Delete post
+
+```http
+  POST /delete
+```
+
+| Parameter | Type     | Description                       |
+| :-------- | :------- | :-------------------------------- |
+| `id`      | `string` | **Required**. Id of Post |
+
