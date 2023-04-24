@@ -11,8 +11,6 @@ use thiserror::Error;
 use sqlx::mysql::MySqlPool;
 use sqlx::FromRow;
 use validator::Validate;
-use chrono::NaiveDateTime;
-use chrono::{DateTime, Utc, FixedOffset};
 
 // エラー設定
 #[derive(Debug, Error)]
@@ -38,6 +36,12 @@ pub struct PostDetail {
     created_at: chrono::DateTime<chrono::Utc>,
 }
 
+// bbsへの投稿内容
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, FromRow)]
+pub struct DeletePostId {
+    id: String, // JsonでPostされるため、u32でなくStringにする
+}
+
 // bbsへの投稿内容(insert)
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Validate)]
 pub struct PostContent {
@@ -52,8 +56,8 @@ pub struct PostContent {
 pub trait PostRepository : Clone + std::marker::Send + std::marker::Sync + 'static {
     async fn select_all(&self) -> anyhow::Result<Vec<PostDetail>>;
     async fn find(&self, id:u32) -> anyhow::Result<Post>;
-    //async fn insert(&self, payload:PostContent) -> anyhow::Result<Post>;
     async fn insert(&self, payload:PostContent) -> anyhow::Result<()>;
+    async fn delete(&self, payload: DeletePostId) -> anyhow::Result<()>;
 }
 
 #[derive(Debug, Clone)]
@@ -87,13 +91,14 @@ SELECT * FROM post WHERE id=?
             sqlx::Error::RowNotFound => RepositoryError::NotFound(id),
             _ => RepositoryError::Unexpected(e.to_string()),
         })?;
-        println!("{:?}", post);
         Ok(post)
     }
     // select_allメソッド
     async fn select_all(&self) -> anyhow::Result<Vec<PostDetail>>{
         let posts = sqlx::query_as::<_, PostDetail>(
-        r#"SELECT * FROM post WHERE is_delete = 0 order by id desc, created_at desc"#,
+        r#"
+SELECT * FROM post WHERE is_delete = 0 order by id desc, created_at desc
+        "#,
         )
         .fetch_all(&self.pool)
         .await?;
@@ -101,24 +106,8 @@ SELECT * FROM post WHERE id=?
     }
     // insertメソッド
     // 投稿内容をinsertした後にinsertされたデータを取得してPostへ格納
-    //async fn insert(&self, payload: PostContent) -> anyhow::Result<Post>{
     async fn insert(&self, payload: PostContent) -> anyhow::Result<()>{
         let datetime = chrono::Local::now().naive_local();
-        println!("{:?}", payload);
-        /*
-        let post = sqlx::query_as::<_, Post>(
-        r#"
-insert into post (content, is_delete, created_at, updated_at)
-values($1, 0, NOW(), NOW());
-select * from post where id = (select last_insert_id());
-        "#,
-        )
-        .bind(payload.content.clone())
-        .fetch_one(&self.pool)
-        .await?;
-        Ok(post)
-        */
-
         sqlx::query::<_>(
         r#"
 insert into post (content, is_delete, created_at, updated_at)
@@ -131,5 +120,17 @@ values (?, 0, ?, ?);
         .await?;
         Ok(())
 
+    }
+    // deleteメソッド
+    async fn delete(&self, payload: DeletePostId) -> anyhow::Result<()>{
+        sqlx::query::<_>(
+        r#"
+update post set is_delete = 1 WHERE id = ?
+        "#,
+        )
+        .bind(payload.id.clone())
+        .execute(&self.pool)
+        .await?;
+        Ok(())
     }
 }

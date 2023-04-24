@@ -29,7 +29,10 @@
           <p class="text-gray-700 mb-4">
               {post.content}
           </p>
-          <button type="submit" class="bg-red-400 hover:bg-red-600 text-white text-xs font-bold py-2 px-6 rounded-full transition duration-200 ease-in focus:ring-4 focus:ring-blue-300 focus:outline-none float-right">削除</button>
+          <form action="?/delete" method="post" use:enhance>
+            <input type="hidden" name="id" value={post.id} />
+            <button type="submit" class="bg-red-400 hover:bg-red-600 text-white text-xs font-bold py-2 px-6 rounded-full transition duration-200 ease-in focus:ring-4 focus:ring-blue-300 focus:outline-none float-right">削除</button>
+          </form>
           <p class="text-gray-500 text-sm">投稿日: {post.created_at}</p>
         </li>
         {/each}

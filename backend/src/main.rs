@@ -9,26 +9,15 @@ use handlers::{
     find_post,
     insert_post,
     select_all_post,
+    delete_post,
 };
 
 use axum::{
-    extract::{
-        Form,
-        //Extension,
-        //State,
-    },
-    //body::HttpBody,
-    http::StatusCode,
-    response::{Html, IntoResponse, Response},
     routing::{get, post},
-    Json, Router,
-    //BoxError,
+    Router,
 };
-use serde::{Deserialize};
 use std::{env, sync::Arc};
 use std::net::SocketAddr;
-use thiserror::Error;
-use anyhow::{Result};
 use dotenv::dotenv;
 use hyper::header::CONTENT_TYPE;
 use tower_http::cors::{Any, CorsLayer, AllowOrigin};
@@ -41,7 +30,7 @@ async fn main() {
     tracing_subscriber::fmt::init();
 
     // database情報読み込み
-    dotenv().ok();    // .envの読み込み
+    dotenv().ok(); // .envの読み込み
     let database_url = &env::var("DATABASE_URL").expect("undefined DATABASE_URL");
 
     // プールの作成
@@ -76,6 +65,7 @@ where
         //.route("/", get(show_form))
         // 型推論を使わず、型Tを指定してinsert_postを引数にしている
         .route("/getposts", get(select_all_post::<T>))
+        .route("/delete", post(delete_post::<T>))
         .route("/", post(insert_post::<T>))
         .route("/p/:id", get(find_post::<T>))
         // axumアプリケーション内でrepositoryを共有することができ、
@@ -90,92 +80,3 @@ where
                 .allow_headers(vec![CONTENT_TYPE])
         )
 }
-
-/*
-formを表示する
- */
-
-/*
-async fn show_form() -> impl IntoResponse {
-    let template = HelloTemplate { post_msg: "".to_string() };
-    HtmlTemplate(template)
-}
-
-#[derive(Template)]
-#[template(path = "index.html")]
-struct HelloTemplate {
-    post_msg: String,
-}
-*/
-
-/*
-HtmlTemplateという構造体に対してIntoResponseトレイトを実装している
- */
-/*
-struct HtmlTemplate<T>(T);
-impl<T> IntoResponse for HtmlTemplate<T>
-where
-    T: Template,
-{
-    fn into_response(self) -> Response {
-        match self.0.render() {
-            Ok(html) => Html(html).into_response(),
-            Err(err) => (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                format!("Failed to render template. Error: {}", err),
-            )
-                .into_response(),
-        }
-    }
-}
-*/
-
-/*
-#[derive(Deserialize, Debug)]
-#[allow(dead_code)]
-struct PostInput {
-    text: String,
-}
-
-#[derive(Error, Debug)]
-enum PostError {
-    #[error("message empty")]
-    MsgIsEmpty,
-    #[error("message must be within 100 charcters")]
-    MsgIsOverSize
-}
-
-// validate
-async fn check_msg(msg: &str) -> Result<&'static str> {
-    // 空の場合はエラー
-    let msg_length = msg.len();
-    if msg_length == 0 {
-        Err(PostError::MsgIsEmpty.into())
-    } else if msg_length >= 100 {
-        Err(PostError::MsgIsOverSize.into())
-    } else {
-        Ok("ok")
-    }
-}
-*/
-
-/*
-form受け取り
- */
-/*
-async fn accept_form(Form(post_input): Form<PostInput>) -> impl IntoResponse {
-
-    // 入力チェック
-    let res = check_msg(&post_input.text).await;
-    let template;
-    if res.is_ok() {
-        println!("{}", post_input.text);
-        template = HelloTemplate { post_msg: post_input.text.to_string() };
-        
-    }else{
-        println!("{:?}", res);
-        template = HelloTemplate { post_msg: "err".to_string() };
-    }
-    HtmlTemplate(template)
-}
-*/

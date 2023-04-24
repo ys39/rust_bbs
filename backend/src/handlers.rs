@@ -19,7 +19,7 @@ use axum::{
 use serde::de::DeserializeOwned;
 use std::sync::Arc;
 use validator::Validate;
-use crate::repositories::{ PostRepository, PostContent };
+use crate::repositories::{ PostRepository, PostContent, DeletePostId };
 
 #[derive(Debug, Clone, Copy, Default)]
 pub struct ValidatedJson<T>(pub T);
@@ -36,14 +36,11 @@ where
     type Rejection = (StatusCode, String);
 
     async fn from_request(req: Request<B>, state: &S) -> Result<Self, Self::Rejection> {
-        println!("{:?}", req);
         let Json(value) = Json::<T>::from_request(req, state).await.map_err(|rejection| {
-            println!("debug1");
             let message = format!("Json parse error: [{}]", rejection);
             (StatusCode::BAD_REQUEST, message)
         })?;
         value.validate().map_err(|rejection|{
-            println!("debug2");
             let message = format!("Validate error: [{}]", rejection).replace('\n',", ");
             (StatusCode::BAD_REQUEST, message)
         })?;
@@ -53,19 +50,15 @@ where
 
 // State, ValidatedJsonの引数の順番
 pub async fn insert_post<T: PostRepository>(
-    //Json(payload): Json<PostContent>,
     State(repository): State<Arc<T>>,
     ValidatedJson(payload): ValidatedJson<PostContent>,
 ) -> Result<impl IntoResponse, StatusCode> {
-    //let post = repository.insert(payload).await.or(Err(StatusCode::NOT_FOUND))?;
     repository.insert(payload).await.or(Err(StatusCode::NOT_FOUND))?;
-    //Ok((StatusCode::CREATED, Json(post)))
     Ok(StatusCode::CREATED)
 }
 
 pub async fn find_post<T: PostRepository>(
     Path(id): Path<u32>,
-    //Extension(repository): Extension<Arc<T>>,
     State(repository): State<Arc<T>>,
 ) -> Result<impl IntoResponse, StatusCode> {
     let post = repository.find(id).await.or(Err(StatusCode::NOT_FOUND))?;
@@ -73,11 +66,17 @@ pub async fn find_post<T: PostRepository>(
 }
 
 pub async fn select_all_post<T: PostRepository>(
-    //Extension(repository): Extension<Arc<T>>,
     State(repository): State<Arc<T>>,
 ) -> Result<impl IntoResponse, StatusCode> {
     let posts = repository.select_all().await.or(Err(StatusCode::NOT_FOUND))?;
-    println!("{:?}", posts);
     Ok((StatusCode::OK, Json(posts)))
-    //Ok(Json(posts))
+}
+
+// State, ValidatedJsonの引数の順番
+pub async fn delete_post<T: PostRepository>(
+    State(repository): State<Arc<T>>,
+    Json(payload): Json<DeletePostId>,
+) -> Result<impl IntoResponse, StatusCode> {
+    repository.delete(payload).await.or(Err(StatusCode::NOT_FOUND))?;
+    Ok(StatusCode::OK)
 }
