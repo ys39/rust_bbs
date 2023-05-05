@@ -1,8 +1,5 @@
 export async function getposts(offset, row_count) {
 	// データの取得
-	//const res = await fetch('http://172.100.1.100:8080/getposts');
-	//const posts = await res.json();
-
 	let fd = new FormData();
 	fd.set('offset', offset);
 	fd.set('row_count', row_count);

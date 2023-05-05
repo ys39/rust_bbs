@@ -2,7 +2,9 @@
   import 'virtual:windi.css';
 </script>
 <header class="bg-sky-400 text-white py-4">
-  <h1 class="text-3xl font-bold text-center">Demo BBS</h1>
+  <h1 class="text-3xl font-bold text-left pl-10">
+    <a href="/">Demo BBS</a>
+  </h1>
 </header>
 
 <slot />

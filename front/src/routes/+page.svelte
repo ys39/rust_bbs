@@ -3,8 +3,7 @@
   import Paging from '../components/Paging.svelte';
   import { enhance } from '$app/forms';
   import { getposts } from '$lib/api/getposts.js';
-  import { onMount } from "svelte";
-  import { setContext, getContext } from "svelte";
+  import { onMount, setContext, getContext } from "svelte";
 
   // 変数
   let page = 0; //first page
@@ -47,7 +46,7 @@
     const { content } = Object.fromEntries(data);
     if(content.length === 0) {
       alert('メッセージを入力してください');
-      return;
+      cancel();
     }
     // メッセージ送信後の処理
     return async ({ result, update }) => {
@@ -69,7 +68,7 @@
     const { id } = Object.fromEntries(data);
     if(id.length === 0) {
       alert('IDを入力してください');
-      return;
+      cancel();
     }
     // メッセージ送信後の処理
     return async ({ result, update }) => {
@@ -105,7 +104,9 @@
   </form>
     
     {#if data.all_count}
-      {data.all_count}
+      <div class="bg-violet-300 text-white p-3 rounded-lg shadow-md mt-4 w-1/4">
+        <p>現在の件数: <span class="font-bold">{data.all_count}</span></p>
+      </div>
     {:else}
       Loading...
     {/if}
