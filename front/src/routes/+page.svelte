@@ -1,10 +1,44 @@
 <script>
-	export let data;
-  import Paging from '$lib/components/Paging.svelte';
+	//export let data;
+  import Paging from '../components/Paging.svelte';
   import { enhance } from '$app/forms';
+  import { getposts } from '$lib/api/getposts.js';
+  import { onMount } from "svelte";
+  import { setContext } from "svelte";
 
-  export let form;
-  $: console.log(form);
+  // 変数
+  let page = 0; //first page
+  let pageSize = 5; //5 posts per page
+  let offset = page * pageSize;
+  let data = [];
+
+  // コンポーネント間で値を共有するためのコンテキスト
+  setContext("state", {
+    getState: () => ({
+      page,
+      pageSize,
+      offset,
+    }),
+    setPage: (_page, _offset) => {
+      page = _page;
+      offset = _offset;
+    },
+  });
+
+  // onMountで初期データを取得
+	onMount(async () => {
+    await load(offset);
+	});
+
+  // 初期時にデータを取得
+  async function load(_offset) {
+    data = await getposts(_offset, pageSize);
+  }
+
+  // ページネーションのイベント
+  function onPageChange(event) {
+    load(event.detail.offset);
+  }
 </script>
 
 <main class="container mx-auto my-8 flex-grow">
@@ -19,26 +53,36 @@
     </div>
   </form>
     
-    <Paging />
+    {#if data.all_count}
+      {data.all_count}
+    {:else}
+      Loading...
+    {/if}
+    
+    <!-- <子コンポーネント名 on:"受け取るイベント名"={イベントを受け取った時に実行したい関数} > -->
+    <!-- on:pageChangeで子コンポーネントのpageChangeイベントを監視している -->
+    <!-- pageChangeイベントの発火を検知して、onPageChangeを実行 -->
+    <Paging {page} {pageSize} total={data.all_count} on:pageChange={onPageChange}/>
 
     <div class="container mx-auto py-6">
       <ul>
-      {#each data.list as post}
-        <li class="bg-white p-6 rounded-md shadow-md mb-4">
-          <h2 class="text-xl font-semibold mb-4">投稿者: {post.name}</h2>
-          <p class="text-gray-700 mb-4">
-              {post.content}
-          </p>
-          <form action="?/delete" method="post" use:enhance>
-            <input type="hidden" name="id" value={post.id} />
-            <button type="submit" class="bg-red-400 hover:bg-red-600 text-white text-xs font-bold py-2 px-6 rounded-full transition duration-200 ease-in focus:ring-4 focus:ring-blue-300 focus:outline-none float-right">削除</button>
-          </form>
-          <p class="text-gray-500 text-sm">投稿日: {post.created_at}</p>
-        </li>
-        {/each}
+      {#if data.list}
+        {#each data.list as post}
+          <li class="bg-white p-6 rounded-md shadow-md mb-4">
+            <h2 class="text-xl font-semibold mb-4">投稿者: {post.name}</h2>
+            <p class="text-gray-700 mb-4">
+                {post.content}
+            </p>
+            <form action="?/delete" method="post" use:enhance>
+              <input type="hidden" name="id" value={post.id} />
+              <button type="submit" class="bg-red-400 hover:bg-red-600 text-white text-xs font-bold py-2 px-6 rounded-full transition duration-200 ease-in focus:ring-4 focus:ring-blue-300 focus:outline-none float-right">削除</button>
+            </form>
+            <p class="text-gray-500 text-sm">投稿日: {post.created_at}</p>
+          </li>
+          {/each}
+        {:else}
+         <p>Loading...</p>
+        {/if}
       </ul>
     </div>
-    
-    <Paging />
-
 </main>

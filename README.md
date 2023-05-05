@@ -13,7 +13,7 @@
 
 **Client:**
 
-- Svelte Kit
+- SvelteKit
 - JavaScript
 - Windi CSS
 
@@ -40,8 +40,13 @@
 #### Get all posts
 
 ```http
-  GET /getposts
+  POST /getposts
 ```
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `offset` | `string` | **Required**. offset |
+| `pageSize` | `string` | **Required**. pageSize |
 
 #### Delete post
 
@@ -52,4 +57,3 @@
 | Parameter | Type     | Description                       |
 | :-------- | :------- | :-------------------------------- |
 | `id`      | `string` | **Required**. Id of Post |
-

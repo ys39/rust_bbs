@@ -64,7 +64,8 @@ where
         // ::<> を Turbofish (ターボフィッシュ)
         //.route("/", get(show_form))
         // 型推論を使わず、型Tを指定してinsert_postを引数にしている
-        .route("/getposts", get(select_all_post::<T>))
+        //.route("/getposts", get(select_all_post::<T>))
+        .route("/getposts", post(select_all_post::<T>))
         .route("/delete", post(delete_post::<T>))
         .route("/", post(insert_post::<T>))
         .route("/p/:id", get(find_post::<T>))

@@ -19,7 +19,7 @@ use axum::{
 use serde::de::DeserializeOwned;
 use std::sync::Arc;
 use validator::Validate;
-use crate::repositories::{ PostRepository, PostContent, DeletePostId };
+use crate::repositories::{ PostRepository, PostContent, DeletePostId, PagePostContent };
 
 #[derive(Debug, Clone, Copy, Default)]
 pub struct ValidatedJson<T>(pub T);
@@ -67,8 +67,10 @@ pub async fn find_post<T: PostRepository>(
 
 pub async fn select_all_post<T: PostRepository>(
     State(repository): State<Arc<T>>,
+    Json(payload): Json<PagePostContent>,
 ) -> Result<impl IntoResponse, StatusCode> {
-    let posts = repository.select_all().await.or(Err(StatusCode::NOT_FOUND))?;
+    let posts = repository.select_all(payload).await.or(Err(StatusCode::NOT_FOUND))?;
+    println!("{:?}", posts);
     Ok((StatusCode::OK, Json(posts)))
 }
 

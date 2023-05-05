@@ -28,7 +28,14 @@ pub struct Post {
     content: String
 }
 
-// bbsへの投稿内容
+// bbsへの投稿内容件数分取得用
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, FromRow)]
+pub struct PagePostContent {
+    offset: String,
+    row_count: String,
+}
+
+// bbsへの投稿内容件数分取得用
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, FromRow)]
 pub struct PostDetail {
     id: u32,
@@ -36,13 +43,19 @@ pub struct PostDetail {
     created_at: chrono::DateTime<chrono::Utc>,
 }
 
-// bbsへの投稿内容
+// bbsへのpost全件数取得用
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, FromRow)]
+pub struct PostAllCount {
+    count: i64, // sql count()はi64で返ってくる
+}
+
+// bbsへの投稿内容を削除するためのid
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, FromRow)]
 pub struct DeletePostId {
     id: String, // JsonでPostされるため、u32でなくStringにする
 }
 
-// bbsへの投稿内容(insert)
+// bbsへの投稿内容をinsertするための構造体
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Validate)]
 pub struct PostContent {
     #[validate(length(min=1, message="投稿内容を入力してください"))]
@@ -54,7 +67,7 @@ pub struct PostContent {
 // postに関するデータを取り出すコンポーネント
 #[async_trait]
 pub trait PostRepository : Clone + std::marker::Send + std::marker::Sync + 'static {
-    async fn select_all(&self) -> anyhow::Result<Vec<PostDetail>>;
+    async fn select_all(&self, payload:PagePostContent) -> anyhow::Result<(Vec<PostDetail>, PostAllCount)>;
     async fn find(&self, id:u32) -> anyhow::Result<Post>;
     async fn insert(&self, payload:PostContent) -> anyhow::Result<()>;
     async fn delete(&self, payload: DeletePostId) -> anyhow::Result<()>;
@@ -94,15 +107,26 @@ SELECT * FROM post WHERE id=?
         Ok(post)
     }
     // select_allメソッド
-    async fn select_all(&self) -> anyhow::Result<Vec<PostDetail>>{
+    async fn select_all(&self, payload:PagePostContent) -> anyhow::Result<(Vec<PostDetail>, PostAllCount)>{
         let posts = sqlx::query_as::<_, PostDetail>(
         r#"
 SELECT * FROM post WHERE is_delete = 0 order by id desc, created_at desc
+LIMIT ?, ?;
         "#,
         )
+        .bind(payload.offset.clone())
+        .bind(payload.row_count.clone())
         .fetch_all(&self.pool)
         .await?;
-        Ok(posts)
+    let posts_num = sqlx::query_as::<_, PostAllCount>(
+        r#"
+SELECT COUNT(*) as count FROM post WHERE is_delete = 0;
+        "#,
+        )
+        .fetch_one(&self.pool)
+        .await?;
+        println!("{:?}", posts_num);
+        Ok((posts.clone(), posts_num))
     }
     // insertメソッド
     // 投稿内容をinsertした後にinsertされたデータを取得してPostへ格納
