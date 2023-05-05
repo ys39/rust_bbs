@@ -32,7 +32,7 @@
     <nav aria-label="Page navigation" class="text-center">
     <ul class="flex items-center justify-between space-x-4">
       {#each buttons as button}
-        {#if page + button >= 0 && page + button < pageCount }
+        {#if page + button >= 0 && page + button <= pageCount }
           <li>
           <button
             class:active={page === page + button}
