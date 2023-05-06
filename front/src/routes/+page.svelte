@@ -105,7 +105,7 @@
     
     {#if data.all_count}
       <div class="bg-violet-300 text-white p-3 rounded-lg shadow-md mt-4 w-1/4">
-        <p>現在の件数: <span class="font-bold">{data.all_count}</span></p>
+        <p>投稿件数: <span class="font-bold">{data.all_count}</span></p>
       </div>
     {:else}
       Loading...
@@ -123,7 +123,7 @@
       <ul>
       {#if data.list}
         {#each data.list as post}
-          <li class="bg-white p-6 rounded-md shadow-md mb-4">
+          <li class="bg-slate-50 p-6 rounded-md shadow-md mb-4">
             <h2 class="text-xl font-semibold mb-4">投稿者: {post.name}</h2>
             <p class="text-gray-700 mb-4">
                 {post.content}
