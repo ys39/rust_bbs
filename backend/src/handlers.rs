@@ -57,14 +57,6 @@ pub async fn insert_post<T: PostRepository>(
     Ok(StatusCode::CREATED)
 }
 
-pub async fn find_post<T: PostRepository>(
-    Path(id): Path<u32>,
-    State(repository): State<Arc<T>>,
-) -> Result<impl IntoResponse, StatusCode> {
-    let post = repository.find(id).await.or(Err(StatusCode::NOT_FOUND))?;
-    Ok((StatusCode::OK, Json(post)))
-}
-
 pub async fn select_all_post<T: PostRepository>(
     State(repository): State<Arc<T>>,
     Json(payload): Json<PagePostContent>,

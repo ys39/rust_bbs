@@ -6,7 +6,6 @@ use crate::repositories::{
 };
 
 use handlers::{
-    find_post,
     insert_post,
     select_all_post,
     delete_post,
@@ -68,14 +67,12 @@ where
         .route("/getposts", post(select_all_post::<T>))
         .route("/delete", post(delete_post::<T>))
         .route("/", post(insert_post::<T>))
-        .route("/p/:id", get(find_post::<T>))
         // axumアプリケーション内でrepositoryを共有することができ、
         // repositoryは各ハンドラの引数で受け取ることが可能
         //.layer(Extension(Arc::new(repository)))
         .with_state(Arc::new(repository))
         .layer(
             CorsLayer::new()
-                .allow_origin(AllowOrigin::exact("http://f1.nono.com".parse().unwrap()))
                 .allow_origin(AllowOrigin::exact("http://nono:9000".parse().unwrap()))
                 .allow_methods(Any)
                 .allow_headers(vec![CONTENT_TYPE])

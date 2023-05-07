@@ -28,7 +28,7 @@ pub struct Post {
     content: String
 }
 
-// bbsへの投稿内容件数分取得用
+// bbsのページネーション用
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, FromRow)]
 pub struct PagePostContent {
     offset: String,
@@ -68,7 +68,6 @@ pub struct PostContent {
 #[async_trait]
 pub trait PostRepository : Clone + std::marker::Send + std::marker::Sync + 'static {
     async fn select_all(&self, payload:PagePostContent) -> anyhow::Result<(Vec<PostDetail>, PostAllCount)>;
-    async fn find(&self, id:u32) -> anyhow::Result<Post>;
     async fn insert(&self, payload:PostContent) -> anyhow::Result<()>;
     async fn delete(&self, payload: DeletePostId) -> anyhow::Result<()>;
 }
@@ -90,22 +89,6 @@ impl PostRepositoryForDb {
 // PostRepositoryトレイトをPostRepositoryForDbに実装する
 #[async_trait]
 impl PostRepository for PostRepositoryForDb {
-    // selectメソッド
-    async fn find(&self, id: u32) -> anyhow::Result<Post>{
-        let post = sqlx::query_as::<_, Post>(
-        r#"
-SELECT * FROM post WHERE id=?
-        "#,
-        )
-        .bind(id)
-        .fetch_one(&self.pool)
-        .await
-        .map_err(|e| match e{
-            sqlx::Error::RowNotFound => RepositoryError::NotFound(id),
-            _ => RepositoryError::Unexpected(e.to_string()),
-        })?;
-        Ok(post)
-    }
     // select_allメソッド
     async fn select_all(&self, payload:PagePostContent) -> anyhow::Result<(Vec<PostDetail>, PostAllCount)>{
         let posts = sqlx::query_as::<_, PostDetail>(
